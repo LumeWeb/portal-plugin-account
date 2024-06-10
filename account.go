@@ -460,7 +460,13 @@ func (a *AccountAPI) Configure(router *mux.Router) error {
 	router.HandleFunc("/api/account/update-password", a.updatePassword).Methods("POST").Use(authMw, corsHandler.Handler)
 
 	// Catch-all route for client-side app
-	router.PathPrefix("/").Handler(portal_dashboard.Handler())
+	router.PathPrefix("/assets/").Handler(portal_dashboard.Handler())
+	router.PathPrefix("/").Handler(portal_dashboard.Handler()).Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			r.URL.Path = "/"
+			next.ServeHTTP(w, r)
+		})
+	})
 
 	return nil
 }
