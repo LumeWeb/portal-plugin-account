@@ -1,9 +1,9 @@
 package account
 
 import (
-	"github.com/LumeWeb/portal/core"
-	"github.com/LumeWeb/portal/middleware"
 	"github.com/gorilla/mux"
+	"go.lumeweb.com/portal/core"
+	"go.lumeweb.com/portal/middleware"
 	"net/http"
 )
 
