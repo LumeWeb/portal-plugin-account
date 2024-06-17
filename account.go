@@ -21,7 +21,13 @@ var swagSpec []byte
 var _ core.API = (*AccountAPI)(nil)
 
 func init() {
-	core.RegisterPlugin(factory)
+	core.RegisterPlugin(core.PluginInfo{
+		ID: "account",
+		API: func() (core.API, []core.ContextBuilderOption, error) {
+			return NewAccountAPI()
+		},
+		Depends: []string{core.USER_SERVICE, core.EMAIL_VERIFICATION_SERVICE, core.AUTH_SERVICE, core.PASSWORD_RESET_SERVICE, core.OTP_SERVICE},
+	})
 }
 
 type AccountAPI struct {
@@ -39,17 +45,25 @@ func (a *AccountAPI) Name() string {
 	return "account"
 }
 
-func NewAccountAPI(ctx core.Context) *AccountAPI {
-	return &AccountAPI{
-		ctx:         ctx,
-		config:      ctx.Config(),
-		user:        ctx.Services().User(),
-		user_verify: ctx.Services().UserVerify(),
-		auth:        ctx.Services().Auth(),
-		password:    ctx.Services().Password(),
-		otp:         ctx.Services().Otp(),
-		logger:      ctx.Logger(),
-	}
+func NewAccountAPI() (*AccountAPI, []core.ContextBuilderOption, error) {
+	api := &AccountAPI{}
+
+	opts := core.ContextOptions(
+		core.ContextWithStartupFunc(func(ctx core.Context) error {
+			api.ctx = ctx
+			api.config = ctx.Config()
+			api.user = ctx.Service(core.USER_SERVICE).(core.UserService)
+			api.user_verify = ctx.Service(core.EMAIL_VERIFICATION_SERVICE).(core.EmailVerificationService)
+			api.auth = ctx.Service(core.AUTH_SERVICE).(core.AuthService)
+			api.password = ctx.Service(core.PASSWORD_RESET_SERVICE).(core.PasswordResetService)
+			api.otp = ctx.Service(core.OTP_SERVICE).(core.OTPService)
+			api.logger = ctx.Logger()
+
+			return nil
+		}),
+	)
+
+	return api, opts, nil
 }
 
 func (a *AccountAPI) login(w http.ResponseWriter, r *http.Request) {
@@ -477,13 +491,4 @@ func (a *AccountAPI) Subdomain() string {
 
 func (a *AccountAPI) AuthTokenName() string {
 	return core.AUTH_COOKIE_NAME
-}
-
-func factory() core.PluginInfo {
-	return core.PluginInfo{
-		ID: "account",
-		GetAPI: func(ctx *core.Context) (core.API, error) {
-			return NewAccountAPI(*ctx), nil
-		},
-	}
 }
