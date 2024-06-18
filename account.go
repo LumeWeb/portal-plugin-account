@@ -20,25 +20,29 @@ var swagSpec []byte
 
 var _ core.API = (*AccountAPI)(nil)
 
+const pluginName = "account"
+
 func init() {
 	core.RegisterPlugin(core.PluginInfo{
-		ID: "account",
+		ID: pluginName,
 		API: func() (core.API, []core.ContextBuilderOption, error) {
 			return NewAccountAPI()
 		},
-		Depends: []string{core.USER_SERVICE, core.EMAIL_VERIFICATION_SERVICE, core.AUTH_SERVICE, core.PASSWORD_RESET_SERVICE, core.OTP_SERVICE},
 	})
 }
 
 type AccountAPI struct {
-	ctx         core.Context
-	config      config.Manager
-	user        core.UserService
-	user_verify core.EmailVerificationService
-	auth        core.AuthService
-	password    core.PasswordResetService
-	otp         core.OTPService
-	logger      *core.Logger
+	ctx      core.Context
+	config   config.Manager
+	user     core.UserService
+	auth     core.AuthService
+	password core.PasswordResetService
+	otp      core.OTPService
+	logger   *core.Logger
+}
+
+func (a *AccountAPI) Config() config.APIConfig {
+	return &APIConfig{}
 }
 
 func (a *AccountAPI) Name() string {
@@ -53,7 +57,6 @@ func NewAccountAPI() (*AccountAPI, []core.ContextBuilderOption, error) {
 			api.ctx = ctx
 			api.config = ctx.Config()
 			api.user = ctx.Service(core.USER_SERVICE).(core.UserService)
-			api.user_verify = ctx.Service(core.EMAIL_VERIFICATION_SERVICE).(core.EmailVerificationService)
 			api.auth = ctx.Service(core.AUTH_SERVICE).(core.AuthService)
 			api.password = ctx.Service(core.PASSWORD_RESET_SERVICE).(core.PasswordResetService)
 			api.otp = ctx.Service(core.OTP_SERVICE).(core.OTPService)
@@ -153,7 +156,7 @@ func (a *AccountAPI) verifyEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = a.user_verify.VerifyEmail(request.Email, request.Token)
+	err = a.user.VerifyEmail(request.Email, request.Token)
 	if err != nil {
 		_ = ctx.Error(err, http.StatusInternalServerError)
 		return
@@ -166,7 +169,7 @@ func (a *AccountAPI) resendVerifyEmail(w http.ResponseWriter, r *http.Request) {
 	ctx := httputil.Context(r, w)
 	user := middleware.GetUserFromContext(r.Context())
 
-	err := a.user_verify.SendEmailVerification(user)
+	err := a.user.SendEmailVerification(user)
 	if err != nil {
 		_ = ctx.Error(err, http.StatusInternalServerError)
 		return
@@ -486,7 +489,7 @@ func (a *AccountAPI) Configure(router *mux.Router) error {
 }
 
 func (a *AccountAPI) Subdomain() string {
-	return a.ctx.Config().Config().Core.AccountSubdomain
+	return a.ctx.Config().GetAPI(pluginName).(*APIConfig).Subdomain
 }
 
 func (a *AccountAPI) AuthTokenName() string {
