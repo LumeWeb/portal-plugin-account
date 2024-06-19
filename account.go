@@ -20,7 +20,7 @@ var swagSpec []byte
 
 var _ core.API = (*AccountAPI)(nil)
 
-const pluginName = "account"
+const pluginName = "dashboard"
 
 func init() {
 	core.RegisterPlugin(core.PluginInfo{
