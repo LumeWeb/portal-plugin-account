@@ -64,6 +64,18 @@ func NewAccountAPI() (*AccountAPI, []core.ContextBuilderOption, error) {
 
 			return nil
 		}),
+		core.ContextWithStartupFunc(func(ctx core.Context) error {
+			e, ok := ctx.Event().GetEvent(core.EVENT_USER_SUBDOMAIN_SET)
+			if !ok {
+				return errors.New("event not found")
+			}
+			e.Set("subdomain", api.Subdomain())
+			err := ctx.Event().FireEvent(e)
+			if err != nil {
+				return err
+			}
+			return nil
+		}),
 	)
 
 	return api, opts, nil
