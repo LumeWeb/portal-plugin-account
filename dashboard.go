@@ -8,6 +8,7 @@ import (
 	"go.lumeweb.com/httputil"
 	"go.lumeweb.com/portal/config"
 	"go.lumeweb.com/portal/core"
+	"go.lumeweb.com/portal/event"
 	"go.lumeweb.com/portal/middleware"
 	"go.lumeweb.com/portal/middleware/swagger"
 	portal_dashboard "go.lumeweb.com/web/go/portal-dashboard"
@@ -65,11 +66,11 @@ func NewAccountAPI() (*AccountAPI, []core.ContextBuilderOption, error) {
 			return nil
 		}),
 		core.ContextWithStartupFunc(func(ctx core.Context) error {
-			e, ok := ctx.Event().GetEvent(core.EVENT_USER_SUBDOMAIN_SET)
+			e, ok := ctx.Event().GetEvent(event.EVENT_USER_SUBDOMAIN_SET)
 			if !ok {
 				return errors.New("event not found")
 			}
-			e.Set("subdomain", api.Subdomain())
+			e.(*event.UserSubdomainSetEvent).SetSubdomain(api.Subdomain())
 			err := ctx.Event().FireEvent(e)
 			if err != nil {
 				return err
