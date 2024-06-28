@@ -1,6 +1,7 @@
 package account
 
 import (
+	"embed"
 	_ "embed"
 	"errors"
 	"github.com/gorilla/mux"
@@ -11,6 +12,7 @@ import (
 	"go.lumeweb.com/portal/event"
 	"go.lumeweb.com/portal/middleware"
 	"go.lumeweb.com/portal/middleware/swagger"
+	"go.lumeweb.com/portal/service"
 	portal_dashboard "go.lumeweb.com/web/go/portal-dashboard"
 	"go.uber.org/zap"
 	"net/http"
@@ -19,16 +21,25 @@ import (
 //go:embed swagger.yaml
 var swagSpec []byte
 
+//go:embed templates/*
+var mailerTemplates embed.FS
+
 var _ core.API = (*AccountAPI)(nil)
 
 const pluginName = "dashboard"
 
 func init() {
+	templates, err := service.MailerTemplatesFromEmbed(&mailerTemplates, "")
+	if err != nil {
+		panic(err)
+	}
+
 	core.RegisterPlugin(core.PluginInfo{
 		ID: pluginName,
 		API: func() (core.API, []core.ContextBuilderOption, error) {
 			return NewAccountAPI()
 		},
+		MailerTemplates: templates,
 	})
 }
 
