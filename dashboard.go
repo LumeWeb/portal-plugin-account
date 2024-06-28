@@ -467,6 +467,8 @@ func (a *AccountAPI) Configure(router *mux.Router) error {
 		return err
 	}
 
+	router.Use(corsHandler.Handler)
+
 	// Routes
 	router.HandleFunc("/api/upload-limit", a.uploadLimit).Methods("GET").Use(corsHandler.Handler)
 	router.HandleFunc("/api/meta", a.meta).Methods("GET").Use(corsHandler.Handler)
@@ -474,20 +476,20 @@ func (a *AccountAPI) Configure(router *mux.Router) error {
 	router.HandleFunc("/api/account/password-reset/request", a.passwordResetRequest).Methods("POST").Use(corsHandler.Handler)
 	router.HandleFunc("/api/account/password-reset/confirm", a.passwordResetConfirm).Methods("POST").Use(corsHandler.Handler)
 
-	router.HandleFunc("/api/auth/otp/generate", a.otpGenerate).Methods("GET").Use(authMw, corsHandler.Handler)
-	router.HandleFunc("/api/account", a.accountInfo).Methods("GET").Use(authMw, corsHandler.Handler)
+	router.HandleFunc("/api/auth/otp/generate", a.otpGenerate).Methods("GET").Use(authMw)
+	router.HandleFunc("/api/account", a.accountInfo).Methods("GET").Use(authMw)
 
-	router.HandleFunc("/api/auth/ping", a.ping).Methods("POST").Use(pingAuthMw, corsHandler.Handler)
+	router.HandleFunc("/api/auth/ping", a.ping).Methods("POST").Use(pingAuthMw)
 	router.HandleFunc("/api/auth/login", a.login).Methods("POST").Use(loginAuthMw2fa, corsHandler.Handler)
-	router.HandleFunc("/api/auth/otp/validate", a.otpValidate).Methods("POST").Use(authMw, corsHandler.Handler)
-	router.HandleFunc("/api/auth/logout", a.logout).Methods("POST").Use(authMw, corsHandler.Handler)
+	router.HandleFunc("/api/auth/otp/validate", a.otpValidate).Methods("POST").Use(authMw)
+	router.HandleFunc("/api/auth/logout", a.logout).Methods("POST").Use(authMw)
 
-	router.HandleFunc("/api/account/verify-email", a.verifyEmail).Methods("POST").Use(authMw, corsHandler.Handler)
-	router.HandleFunc("/api/account/verify-email/resend", a.resendVerifyEmail).Methods("POST").Use(authMw, corsHandler.Handler)
-	router.HandleFunc("/api/account/otp/verify", a.otpVerify).Methods("POST").Use(authMw, corsHandler.Handler)
-	router.HandleFunc("/api/account/otp/disable", a.otpDisable).Methods("POST").Use(authMw, corsHandler.Handler)
-	router.HandleFunc("/api/account/update-email", a.updateEmail).Methods("POST").Use(authMw, corsHandler.Handler)
-	router.HandleFunc("/api/account/update-password", a.updatePassword).Methods("POST").Use(authMw, corsHandler.Handler)
+	router.HandleFunc("/api/account/verify-email", a.verifyEmail).Methods("POST").Use(authMw)
+	router.HandleFunc("/api/account/verify-email/resend", a.resendVerifyEmail).Methods("POST").Use(authMw)
+	router.HandleFunc("/api/account/otp/verify", a.otpVerify).Methods("POST").Use(authMw)
+	router.HandleFunc("/api/account/otp/disable", a.otpDisable).Methods("POST").Use(authMw)
+	router.HandleFunc("/api/account/update-email", a.updateEmail).Methods("POST").Use(authMw)
+	router.HandleFunc("/api/account/update-password", a.updatePassword).Methods("POST").Use(authMw)
 
 	// Catch-all route for client-side app
 	router.PathPrefix("/assets/").Handler(portal_dashboard.Handler())
