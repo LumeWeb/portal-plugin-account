@@ -9,7 +9,7 @@ require (
 	github.com/rs/cors v1.11.0
 	go.lumeweb.com/httputil v0.0.0-20240616192644-3d270a528d86
 	go.lumeweb.com/portal v0.1.2-0.20240628081126-b713975f78f4
-	go.lumeweb.com/web/go/portal-dashboard v0.0.0-20240616193943-ef7d423f8a2c
+	go.lumeweb.com/web/go/portal-dashboard v0.0.0-20240628081414-5a2c17184254
 	go.uber.org/zap v1.27.0
 )
 

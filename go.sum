@@ -622,6 +622,8 @@ go.lumeweb.com/portal v0.1.2-0.20240628081126-b713975f78f4 h1:so4BSfypISYqLd4C3H
 go.lumeweb.com/portal v0.1.2-0.20240628081126-b713975f78f4/go.mod h1:eQc6DJhlazmjCdp88VUsw8BkDhbIJwVaWRqkNzDDlEs=
 go.lumeweb.com/web/go/portal-dashboard v0.0.0-20240616193943-ef7d423f8a2c h1:jk0rs1u74Ei4A8Kk4D7XNvpd8/A1aNsW5V2c7R5huvA=
 go.lumeweb.com/web/go/portal-dashboard v0.0.0-20240616193943-ef7d423f8a2c/go.mod h1:goPhMCfHK+jTzXrO8F1ORs5HHFdJDbw3X3CSFK85C0M=
+go.lumeweb.com/web/go/portal-dashboard v0.0.0-20240628081414-5a2c17184254 h1:SoZkkrAapdisdo1cRaqbzXqqrke83tRdrCQxem7nrBA=
+go.lumeweb.com/web/go/portal-dashboard v0.0.0-20240628081414-5a2c17184254/go.mod h1:goPhMCfHK+jTzXrO8F1ORs5HHFdJDbw3X3CSFK85C0M=
 go.sia.tech/core v0.2.8 h1:NQZw8gz9XWlkw9zr7HrLIA3xQnoatp8lYzyONS0IXJg=
 go.sia.tech/core v0.2.8/go.mod h1:BMgT/reXtgv6XbDgUYTCPY7wSMbspDRDs7KMi1vL6Iw=
 go.sia.tech/coreutils v0.0.7 h1:+4nAMevcItpVUi7IMffvpU/O4D47pjDNF3LOv4y8Y/E=
