@@ -16,6 +16,7 @@ import (
 	portal_dashboard "go.lumeweb.com/web/go/portal-dashboard"
 	"go.uber.org/zap"
 	"net/http"
+	"net/url"
 )
 
 //go:embed swagger.yaml
@@ -125,14 +126,13 @@ func (a *AccountAPI) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	core.SetAuthCookie(w, a.ctx, jwt)
-	core.SendJWT(w, jwt)
+	rootDomain := "https://" + a.ctx.Config().Config().Core.Domain
+	vals := url.Values{}
+	vals.Add(a.AuthTokenName(), jwt)
 
-	response := &LoginResponse{
-		Token: jwt,
-		Otp:   user.OTPEnabled && user.OTPVerified,
-	}
-	ctx.Encode(response)
+	redirectURL := rootDomain + "/api/auth/complete?" + vals.Encode()
+
+	http.Redirect(w, r, redirectURL, http.StatusFound)
 }
 
 func (a *AccountAPI) register(w http.ResponseWriter, r *http.Request) {
@@ -363,6 +363,35 @@ func (a *AccountAPI) ping(w http.ResponseWriter, r *http.Request) {
 	ctx.Encode(response)
 }
 
+func (a *AccountAPI) rootAuthComplete(w http.ResponseWriter, r *http.Request) {
+	ctx := httputil.Context(r, w)
+	userId := middleware.GetUserFromContext(r.Context())
+	token := middleware.GetAuthTokenFromContext(r.Context())
+
+	exists, user, err := a.user.AccountExists(userId)
+	if err != nil {
+		a.logger.Error("failed to check if email exists", zap.Error(err))
+		_ = ctx.Error(err, http.StatusInternalServerError)
+		return
+	}
+
+	if !exists {
+		err := core.NewAccountError(core.ErrKeyInvalidLogin, nil)
+		_ = ctx.Error(err, http.StatusUnauthorized)
+		return
+	}
+
+	core.SetAuthCookie(w, a.ctx, token)
+	core.SendJWT(w, token)
+
+	response := &LoginResponse{
+		Token: token,
+		Otp:   user.OTPEnabled && user.OTPVerified,
+	}
+
+	ctx.Encode(response)
+}
+
 func (a *AccountAPI) accountInfo(w http.ResponseWriter, r *http.Request) {
 	ctx := httputil.Context(r, w)
 	user := middleware.GetUserFromContext(r.Context())
@@ -447,7 +476,9 @@ func (a *AccountAPI) meta(w http.ResponseWriter, r *http.Request) {
 func (a *AccountAPI) Configure(router *mux.Router) error {
 	// CORS configuration
 	corsOpts := cors.Options{
-		AllowedOrigins:   []string{"*"},
+		AllowOriginFunc: func(origin string) bool {
+			return true
+		},
 		AllowedMethods:   []string{"GET", "POST", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 		AllowCredentials: true,
@@ -510,6 +541,13 @@ func (a *AccountAPI) Configure(router *mux.Router) error {
 			next.ServeHTTP(w, r)
 		})
 	})
+
+	rootRouter := core.GetService[core.HTTPService](a.ctx, core.HTTP_SERVICE).Router().Host(a.ctx.Config().Config().Core.Domain).Subrouter()
+
+	rootRouter.Use(pingAuthMw)
+	rootRouter.Use(corsHandler.Handler)
+
+	rootRouter.HandleFunc("/api/auth/complete", a.rootAuthComplete).Methods("GET", "OPTIONS")
 
 	return nil
 }
