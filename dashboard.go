@@ -191,7 +191,11 @@ func (a *AccountAPI) verifyEmail(w http.ResponseWriter, r *http.Request) {
 
 func (a *AccountAPI) resendVerifyEmail(w http.ResponseWriter, r *http.Request) {
 	ctx := httputil.Context(r, w)
-	user := middleware.GetUserFromContext(r.Context())
+	user, ok := a.getUser(ctx)
+
+	if !ok {
+		return
+	}
 
 	err := a.user.SendEmailVerification(user)
 	if err != nil {
@@ -204,7 +208,11 @@ func (a *AccountAPI) resendVerifyEmail(w http.ResponseWriter, r *http.Request) {
 
 func (a *AccountAPI) otpGenerate(w http.ResponseWriter, r *http.Request) {
 	ctx := httputil.Context(r, w)
-	user := middleware.GetUserFromContext(r.Context())
+	user, ok := a.getUser(ctx)
+
+	if !ok {
+		return
+	}
 
 	otp, err := a.otp.OTPGenerate(user)
 	if err != nil {
@@ -220,7 +228,12 @@ func (a *AccountAPI) otpGenerate(w http.ResponseWriter, r *http.Request) {
 
 func (a *AccountAPI) otpVerify(w http.ResponseWriter, r *http.Request) {
 	ctx := httputil.Context(r, w)
-	user := middleware.GetUserFromContext(r.Context())
+	user, ok := a.getUser(ctx)
+
+	if !ok {
+		return
+
+	}
 
 	var request OTPVerifyRequest
 	err := ctx.Decode(&request)
@@ -238,7 +251,11 @@ func (a *AccountAPI) otpVerify(w http.ResponseWriter, r *http.Request) {
 }
 func (a *AccountAPI) otpValidate(w http.ResponseWriter, r *http.Request) {
 	ctx := httputil.Context(r, w)
-	user := middleware.GetUserFromContext(r.Context())
+	user, ok := a.getUser(ctx)
+
+	if !ok {
+		return
+	}
 
 	var request OTPValidateRequest
 	err := ctx.Decode(&request)
@@ -263,7 +280,11 @@ func (a *AccountAPI) otpValidate(w http.ResponseWriter, r *http.Request) {
 }
 func (a *AccountAPI) otpDisable(w http.ResponseWriter, r *http.Request) {
 	ctx := httputil.Context(r, w)
-	user := middleware.GetUserFromContext(r.Context())
+	user, ok := a.getUser(ctx)
+
+	if !ok {
+		return
+	}
 
 	var request OTPDisableRequest
 	err := ctx.Decode(&request)
@@ -352,7 +373,12 @@ func (a *AccountAPI) passwordResetConfirm(w http.ResponseWriter, r *http.Request
 func (a *AccountAPI) ping(w http.ResponseWriter, r *http.Request) {
 	ctx := httputil.Context(r, w)
 
-	token := middleware.GetAuthTokenFromContext(r.Context())
+	token, ok := a.getAuthToken(ctx)
+
+	if !ok {
+		return
+	}
+
 	core.EchoAuthCookie(w, r, a.ctx)
 	core.SendJWT(w, token)
 
@@ -365,8 +391,15 @@ func (a *AccountAPI) ping(w http.ResponseWriter, r *http.Request) {
 
 func (a *AccountAPI) rootAuthComplete(w http.ResponseWriter, r *http.Request) {
 	ctx := httputil.Context(r, w)
-	userId := middleware.GetUserFromContext(r.Context())
-	token := middleware.GetAuthTokenFromContext(r.Context())
+	userId, ok := a.getUser(ctx)
+
+	if !ok {
+		return
+	}
+	token, ok := a.getAuthToken(ctx)
+	if !ok {
+		return
+	}
 
 	exists, user, err := a.user.AccountExists(userId)
 	if err != nil {
@@ -394,7 +427,11 @@ func (a *AccountAPI) rootAuthComplete(w http.ResponseWriter, r *http.Request) {
 
 func (a *AccountAPI) accountInfo(w http.ResponseWriter, r *http.Request) {
 	ctx := httputil.Context(r, w)
-	user := middleware.GetUserFromContext(r.Context())
+	user, ok := a.getUser(ctx)
+
+	if !ok {
+		return
+	}
 
 	_, acct, err := a.user.AccountExists(user)
 	if err != nil {
@@ -428,7 +465,11 @@ func (a *AccountAPI) uploadLimit(w http.ResponseWriter, r *http.Request) {
 
 func (a *AccountAPI) updateEmail(w http.ResponseWriter, r *http.Request) {
 	ctx := httputil.Context(r, w)
-	user := middleware.GetUserFromContext(r.Context())
+	user, ok := a.getUser(ctx)
+
+	if !ok {
+		return
+	}
 
 	var request UpdateEmailRequest
 	err := ctx.Decode(&request)
@@ -447,7 +488,11 @@ func (a *AccountAPI) updateEmail(w http.ResponseWriter, r *http.Request) {
 
 func (a *AccountAPI) updatePassword(w http.ResponseWriter, r *http.Request) {
 	ctx := httputil.Context(r, w)
-	user := middleware.GetUserFromContext(r.Context())
+	user, ok := a.getUser(ctx)
+
+	if !ok {
+		return
+	}
 
 	var request UpdatePasswordRequest
 	err := ctx.Decode(&request)
@@ -471,6 +516,28 @@ func (a *AccountAPI) meta(w http.ResponseWriter, r *http.Request) {
 		Domain: a.config.Config().Core.Domain,
 	}
 	ctx.Encode(response)
+}
+
+func (a *AccountAPI) getUser(ctx httputil.RequestContext) (uint, bool) {
+	user, err := middleware.GetUserFromContext(ctx)
+
+	if err != nil {
+		_ = ctx.Error(core.NewAccountError(core.ErrKeyInvalidLogin, nil), http.StatusUnauthorized)
+		return 0, false
+	}
+
+	return user, true
+}
+
+func (a *AccountAPI) getAuthToken(ctx httputil.RequestContext) (string, bool) {
+	token, err := middleware.GetAuthTokenFromContext(ctx)
+
+	if err != nil {
+		_ = ctx.Error(core.NewAccountError(core.ErrKeyInvalidLogin, nil), http.StatusUnauthorized)
+		return "", false
+	}
+
+	return token, true
 }
 
 func (a *AccountAPI) Configure(router *mux.Router) error {
