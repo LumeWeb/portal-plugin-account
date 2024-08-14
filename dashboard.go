@@ -553,19 +553,19 @@ func (a *AccountAPI) Configure(router *mux.Router) error {
 	corsHandler := cors.New(corsOpts)
 
 	// Middleware functions
-	loginAuthMw2fa := authMiddleware(middleware.AuthMiddlewareOptions{
+	loginAuthMw2fa := middleware.AuthMiddleware(middleware.AuthMiddlewareOptions{
 		Context:        a.ctx,
 		Purpose:        core.JWTPurpose2FA,
 		EmptyAllowed:   true,
 		ExpiredAllowed: true,
 	})
 
-	authMw := authMiddleware(middleware.AuthMiddlewareOptions{
+	authMw := middleware.AuthMiddleware(middleware.AuthMiddlewareOptions{
 		Context: a.ctx,
 		Purpose: core.JWTPurposeNone,
 	})
 
-	pingAuthMw := authMiddleware(middleware.AuthMiddlewareOptions{
+	pingAuthMw := middleware.AuthMiddleware(middleware.AuthMiddlewareOptions{
 		Context: a.ctx,
 		Purpose: core.JWTPurposeLogin,
 	})
