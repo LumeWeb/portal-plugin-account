@@ -73,7 +73,7 @@ func NewAccountAPI() (*AccountAPI, []core.ContextBuilderOption, error) {
 			api.auth = ctx.Service(core.AUTH_SERVICE).(core.AuthService)
 			api.password = ctx.Service(core.PASSWORD_RESET_SERVICE).(core.PasswordResetService)
 			api.otp = ctx.Service(core.OTP_SERVICE).(core.OTPService)
-			api.logger = ctx.Logger()
+			api.logger = ctx.APILogger(api)
 
 			return nil
 		}),
