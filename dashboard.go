@@ -17,6 +17,7 @@ import (
 	"go.uber.org/zap"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 //go:embed swagger.yaml
@@ -597,9 +598,11 @@ func (a *AccountAPI) Configure(router *mux.Router) error {
 
 	// Catch-all route for client-side app
 	router.PathPrefix("/assets/").Handler(portal_dashboard.Handler())
-	router.PathPrefix("/").Handler(portal_dashboard.Handler()).Use(func(next http.Handler) http.Handler {
+	router.PathPrefix("/").MatcherFunc(
+		func(r *http.Request, rm *mux.RouteMatch) bool {
+			return !strings.HasPrefix(r.URL.Path, "/api/")
+		}).Handler(portal_dashboard.Handler()).Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			r.URL.Path = "/"
 			next.ServeHTTP(w, r)
 		})
 	})
