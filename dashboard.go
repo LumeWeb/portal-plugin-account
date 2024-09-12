@@ -1,4 +1,4 @@
-package account
+package dashboard
 
 import (
 	"embed"
@@ -60,7 +60,7 @@ func (a *AccountAPI) Config() config.APIConfig {
 }
 
 func (a *AccountAPI) Name() string {
-	return "account"
+	return "dashboard"
 }
 
 func NewAccountAPI() (*AccountAPI, []core.ContextBuilderOption, error) {
