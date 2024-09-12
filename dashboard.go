@@ -112,7 +112,7 @@ func (a *AccountAPI) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jwt, user, err := a.auth.LoginPassword(request.Email, request.Password, r.RemoteAddr)
+	jwt, user, err := a.auth.LoginPassword(request.Email, request.Password, r.RemoteAddr, request.Remember)
 	if err != nil || user == nil {
 		err := core.NewAccountError(core.ErrKeyInvalidLogin, err)
 		_ = ctx.Error(err, http.StatusUnauthorized)
