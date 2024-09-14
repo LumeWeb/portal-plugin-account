@@ -1,4 +1,4 @@
-package dashboard
+package config
 
 import "go.lumeweb.com/portal/config"
 
