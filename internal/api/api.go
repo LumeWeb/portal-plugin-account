@@ -494,6 +494,7 @@ func (a *API) accountInfo(w http.ResponseWriter, r *http.Request) {
 		FirstName: acct.FirstName,
 		LastName:  acct.LastName,
 		Verified:  acct.Verified,
+		OTP:       acct.OTPEnabled,
 	}
 	ctx.Encode(response)
 }

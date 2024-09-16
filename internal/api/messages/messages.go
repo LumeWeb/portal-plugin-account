@@ -55,6 +55,7 @@ type AccountInfoResponse struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Verified  bool   `json:"verified"`
+	OTP       bool   `json:"otp"`
 }
 
 type UploadLimitResponse struct {
