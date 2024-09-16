@@ -279,6 +279,12 @@ func (a *API) otpVerify(w http.ResponseWriter, r *http.Request) {
 
 	err = a.otp.OTPEnable(user, request.OTP)
 	if err != nil {
+		if errors.Is(err, core.ErrInvalidOTPCode) {
+			err := core.NewAccountError(core.ErrKeyInvalidOTPCode, nil)
+			_ = ctx.Error(err, core.ErrorCodeToHttpStatus[core.ErrKeyInvalidOTPCode])
+			return
+		}
+
 		_ = ctx.Error(err, http.StatusInternalServerError)
 		return
 	}
