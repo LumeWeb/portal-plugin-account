@@ -162,6 +162,15 @@ func (a *API) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if user.OTPEnabled {
+		response := &messages.LoginResponse{
+			Token: jwt,
+			Otp:   true,
+		}
+		ctx.Encode(response)
+		return
+	}
+
 	rootDomain := "https://" + a.ctx.Config().Config().Core.Domain
 	vals := url.Values{}
 	vals.Add(a.AuthTokenName(), jwt)
@@ -311,14 +320,13 @@ func (a *API) otpValidate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	core.SetAuthCookie(w, a.ctx, jwt)
-	core.SendJWT(w, jwt)
+	rootDomain := "https://" + a.ctx.Config().Config().Core.Domain
+	vals := url.Values{}
+	vals.Add(a.AuthTokenName(), jwt)
 
-	response := &messages.LoginResponse{
-		Token: jwt,
-		Otp:   false,
-	}
-	ctx.Encode(response)
+	redirectURL := rootDomain + "/api/auth/complete?" + vals.Encode()
+
+	http.Redirect(w, r, redirectURL, http.StatusFound)
 }
 func (a *API) otpDisable(w http.ResponseWriter, r *http.Request) {
 	ctx := httputil.Context(r, w)
@@ -694,8 +702,8 @@ func (a *API) Configure(router *mux.Router) error {
 	loginAuthMw2fa := middleware.AuthMiddleware(middleware.AuthMiddlewareOptions{
 		Context:        a.ctx,
 		Purpose:        core.JWTPurpose2FA,
-		EmptyAllowed:   true,
-		ExpiredAllowed: true,
+		EmptyAllowed:   false,
+		ExpiredAllowed: false,
 	})
 
 	authMw := middleware.AuthMiddleware(middleware.AuthMiddlewareOptions{
@@ -718,13 +726,13 @@ func (a *API) Configure(router *mux.Router) error {
 
 	// Authentication routes
 	router.HandleFunc("/api/auth/register", a.register).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/auth/login", a.login).Methods("POST", "OPTIONS").Use(loginAuthMw2fa, corsHandler.Handler)
+	router.HandleFunc("/api/auth/login", a.login).Methods("POST", "OPTIONS").Use(corsHandler.Handler)
 	router.HandleFunc("/api/auth/logout", a.logout).Methods("POST", "OPTIONS").Use(authMw)
 	router.HandleFunc("/api/auth/ping", a.ping).Methods("POST", "OPTIONS").Use(pingAuthMw)
 
 	// OTP routes
 	router.HandleFunc("/api/auth/otp/generate", a.otpGenerate).Methods("POST", "OPTIONS").Use(authMw)
-	router.HandleFunc("/api/auth/otp/validate", a.otpValidate).Methods("POST", "OPTIONS").Use(authMw)
+	router.HandleFunc("/api/auth/otp/validate", a.otpValidate).Methods("POST", "OPTIONS").Use(loginAuthMw2fa)
 	router.HandleFunc("/api/auth/otp/verify", a.otpVerify).Methods("POST", "OPTIONS").Use(authMw)
 	router.HandleFunc("/api/auth/otp/disable", a.otpDisable).Methods("POST", "OPTIONS").Use(authMw)
 
