@@ -709,26 +709,29 @@ func (a *API) Configure(router *mux.Router) error {
 
 	router.Use(corsHandler.Handler)
 
-	// Routes
-	router.HandleFunc("/api/upload-limit", a.uploadLimit).Methods("GET", "OPTIONS")
+	// Authentication routes
 	router.HandleFunc("/api/auth/register", a.register).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/auth/login", a.login).Methods("POST", "OPTIONS").Use(loginAuthMw2fa, corsHandler.Handler)
+	router.HandleFunc("/api/auth/logout", a.logout).Methods("POST", "OPTIONS").Use(authMw)
+	router.HandleFunc("/api/auth/ping", a.ping).Methods("POST", "OPTIONS").Use(pingAuthMw)
+
+	// OTP routes
+	router.HandleFunc("/api/auth/otp/generate", a.otpGenerate).Methods("POST", "OPTIONS").Use(authMw)
+	router.HandleFunc("/api/auth/otp/validate", a.otpValidate).Methods("POST", "OPTIONS").Use(authMw)
+	router.HandleFunc("/api/auth/otp/verify", a.otpVerify).Methods("POST", "OPTIONS").Use(authMw)
+	router.HandleFunc("/api/auth/otp/disable", a.otpDisable).Methods("POST", "OPTIONS").Use(authMw)
+
+	// Account routes
+	router.HandleFunc("/api/account", a.accountInfo).Methods("GET", "OPTIONS").Use(authMw)
+	router.HandleFunc("/api/account/verify-email", a.verifyEmail).Methods("POST", "OPTIONS").Use(authMw)
+	router.HandleFunc("/api/account/verify-email/resend", a.resendVerifyEmail).Methods("POST", "OPTIONS").Use(authMw)
+	router.HandleFunc("/api/account/update-email", a.updateEmail).Methods("POST", "OPTIONS").Use(authMw)
+	router.HandleFunc("/api/account/update-password", a.updatePassword).Methods("POST", "OPTIONS").Use(authMw)
 	router.HandleFunc("/api/account/password-reset/request", a.passwordResetRequest).Methods("POST")
 	router.HandleFunc("/api/account/password-reset/confirm", a.passwordResetConfirm).Methods("POST", "OPTIONS")
 
-	router.HandleFunc("/api/auth/otp/generate", a.otpGenerate).Methods("POST", "OPTIONS").Use(authMw)
-	router.HandleFunc("/api/account", a.accountInfo).Methods("GET", "OPTIONS").Use(authMw)
-
-	router.HandleFunc("/api/auth/ping", a.ping).Methods("POST", "OPTIONS").Use(pingAuthMw)
-	router.HandleFunc("/api/auth/login", a.login).Methods("POST", "OPTIONS").Use(loginAuthMw2fa, corsHandler.Handler)
-	router.HandleFunc("/api/auth/otp/validate", a.otpValidate).Methods("POST", "OPTIONS").Use(authMw)
-	router.HandleFunc("/api/auth/logout", a.logout).Methods("POST", "OPTIONS").Use(authMw)
-
-	router.HandleFunc("/api/account/verify-email", a.verifyEmail).Methods("POST", "OPTIONS").Use(authMw)
-	router.HandleFunc("/api/account/verify-email/resend", a.resendVerifyEmail).Methods("POST", "OPTIONS").Use(authMw)
-	router.HandleFunc("/api/account/otp/verify", a.otpVerify).Methods("POST", "OPTIONS").Use(authMw)
-	router.HandleFunc("/api/account/otp/disable", a.otpDisable).Methods("POST", "OPTIONS").Use(authMw)
-	router.HandleFunc("/api/account/update-email", a.updateEmail).Methods("POST", "OPTIONS").Use(authMw)
-	router.HandleFunc("/api/account/update-password", a.updatePassword).Methods("POST", "OPTIONS").Use(authMw)
+	// Other routes
+	router.HandleFunc("/api/upload-limit", a.uploadLimit).Methods("GET", "OPTIONS")
 
 	if pluginCfg.SocialLogin.Enabled {
 		a.setupSocialAuthRoutes(router)
