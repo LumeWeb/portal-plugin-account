@@ -715,7 +715,7 @@ func (a *API) Configure(router *mux.Router) error {
 	router.HandleFunc("/api/account/password-reset/request", a.passwordResetRequest).Methods("POST")
 	router.HandleFunc("/api/account/password-reset/confirm", a.passwordResetConfirm).Methods("POST", "OPTIONS")
 
-	router.HandleFunc("/api/auth/otp/generate", a.otpGenerate).Methods("GET", "OPTIONS").Use(authMw)
+	router.HandleFunc("/api/auth/otp/generate", a.otpGenerate).Methods("POST", "OPTIONS").Use(authMw)
 	router.HandleFunc("/api/account", a.accountInfo).Methods("GET", "OPTIONS").Use(authMw)
 
 	router.HandleFunc("/api/auth/ping", a.ping).Methods("POST", "OPTIONS").Use(pingAuthMw)
