@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
@@ -18,6 +19,7 @@ import (
 	pluginConfig "go.lumeweb.com/portal-plugin-dashboard/internal/config"
 	"go.lumeweb.com/portal-plugin-dashboard/internal/provider"
 	_ "go.lumeweb.com/portal-plugin-dashboard/internal/provider/providers"
+	"go.lumeweb.com/portal-plugin-dashboard/internal/service"
 	"go.lumeweb.com/portal/config"
 	"go.lumeweb.com/portal/core"
 	"go.lumeweb.com/portal/event"
@@ -29,6 +31,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -46,6 +49,7 @@ type API struct {
 	auth     core.AuthService
 	password core.PasswordResetService
 	otp      core.OTPService
+	apiKey   service.APIKeyService
 	logger   *core.Logger
 }
 
@@ -68,6 +72,7 @@ func NewAPI() (*API, []core.ContextBuilderOption, error) {
 			api.auth = ctx.Service(core.AUTH_SERVICE).(core.AuthService)
 			api.password = ctx.Service(core.PASSWORD_RESET_SERVICE).(core.PasswordResetService)
 			api.otp = ctx.Service(core.OTP_SERVICE).(core.OTPService)
+			api.apiKey = ctx.Service(service.API_KEY_SERVICE).(service.APIKeyService)
 			api.logger = ctx.APILogger(api)
 
 			return nil
@@ -685,6 +690,131 @@ func (a *API) setupOrLoginSocialUser(guser *goth.User, ctx *httputil.RequestCont
 	http.Redirect(ctx.Response, ctx.Request, redirectURL, http.StatusFound)
 }
 
+func (a *API) createAPIKey(w http.ResponseWriter, r *http.Request) {
+	ctx := httputil.Context(r, w)
+	user, ok := a.getUser(ctx)
+	if !ok {
+		return
+	}
+
+	var request messages.APIKeyCreateRequest
+	if err := ctx.Decode(&request); err != nil {
+		return
+	}
+
+	apiKey, err := a.apiKey.CreateAPIKey(user, request.Name)
+	if err != nil {
+		_ = ctx.Error(err, http.StatusInternalServerError)
+		return
+	}
+
+	ctx.Encode(apiKey)
+}
+
+func (a *API) getAPIKeys(w http.ResponseWriter, r *http.Request) {
+	ctx := httputil.Context(r, w)
+	user, ok := a.getUser(ctx)
+	if !ok {
+		return
+	}
+
+	query := r.URL.Query()
+
+	// Parse pagination
+	pagination := &service.Pagination{
+		Page:     1,
+		PageSize: 10,
+	}
+	if page := query.Get("_page"); page != "" {
+		pagination.Page, _ = strconv.Atoi(page)
+	}
+	if pageSize := query.Get("_limit"); pageSize != "" {
+		pagination.PageSize, _ = strconv.Atoi(pageSize)
+	}
+
+	// Parse filters
+	filters := make(map[string]interface{})
+	for key, values := range query {
+		if !strings.HasPrefix(key, "_") && len(values) > 0 {
+			filters[key] = values[0]
+		}
+	}
+
+	// Parse sorters
+	var sorters []service.Sorter
+	if sort := query.Get("_sort"); sort != "" {
+		sortFields := strings.Split(sort, ",")
+		sortOrders := strings.Split(query.Get("_order"), ",")
+		for i, field := range sortFields {
+			order := "asc"
+			if i < len(sortOrders) {
+				order = sortOrders[i]
+			}
+			sorters = append(sorters, service.Sorter{Field: field, Order: order})
+		}
+	}
+
+	result, err := a.apiKey.GetAPIKeys(user, pagination, filters, sorters)
+	if err != nil {
+		_ = ctx.Error(err, http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("X-Total-Count", fmt.Sprintf("%d", result.Total))
+	ctx.Encode(result.Data)
+}
+
+func (a *API) deleteAPIKey(w http.ResponseWriter, r *http.Request) {
+	ctx := httputil.Context(r, w)
+	user, ok := a.getUser(ctx)
+	if !ok {
+		return
+	}
+
+	vars := mux.Vars(r)
+	keyID, err := uuid.Parse(vars["keyID"])
+	if err != nil {
+		_ = ctx.Error(errors.New("invalid key ID"), http.StatusBadRequest)
+		return
+	}
+
+	err = a.apiKey.DeleteAPIKey(user, keyID)
+	if err != nil {
+		_ = ctx.Error(err, http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (a *API) authWithAPIKey(w http.ResponseWriter, r *http.Request) {
+	ctx := httputil.Context(r, w)
+
+	token := middleware.ParseAuthTokenHeader(ctx.Request.Header)
+
+	if token == "" {
+		_ = ctx.Error(errors.New("missing Authorization header"), http.StatusUnauthorized)
+		return
+	}
+
+	validatedKey, err := a.apiKey.ValidateAPIKey(token)
+	if err != nil {
+		_ = ctx.Error(errors.New("invalid API key"), http.StatusUnauthorized)
+		return
+	}
+
+	jwt, err := a.auth.LoginID(validatedKey.UserID, r.RemoteAddr)
+	if err != nil {
+		_ = ctx.Error(err, http.StatusInternalServerError)
+		return
+	}
+
+	response := &messages.LoginResponse{
+		Token: jwt,
+	}
+
+	ctx.Encode(response)
+}
 func (a *API) Configure(router *mux.Router) error {
 	pluginCfg := a.config.GetAPI(internal.PLUGIN_NAME).(*pluginConfig.APIConfig)
 	// CORS configuration
@@ -708,11 +838,6 @@ func (a *API) Configure(router *mux.Router) error {
 
 	authMw := middleware.AuthMiddleware(middleware.AuthMiddlewareOptions{
 		Context: a.ctx,
-		Purpose: core.JWTPurposeNone,
-	})
-
-	pingAuthMw := middleware.AuthMiddleware(middleware.AuthMiddlewareOptions{
-		Context: a.ctx,
 		Purpose: core.JWTPurposeLogin,
 	})
 
@@ -728,7 +853,8 @@ func (a *API) Configure(router *mux.Router) error {
 	router.HandleFunc("/api/auth/register", a.register).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/auth/login", a.login).Methods("POST", "OPTIONS").Use(corsHandler.Handler)
 	router.HandleFunc("/api/auth/logout", a.logout).Methods("POST", "OPTIONS").Use(authMw)
-	router.HandleFunc("/api/auth/ping", a.ping).Methods("POST", "OPTIONS").Use(pingAuthMw)
+	router.HandleFunc("/api/auth/ping", a.ping).Methods("POST", "OPTIONS").Use(authMw)
+	router.HandleFunc("/api/auth/key", a.authWithAPIKey).Methods("POST", "OPTIONS")
 
 	// OTP routes
 	router.HandleFunc("/api/auth/otp/generate", a.otpGenerate).Methods("POST", "OPTIONS").Use(authMw)
@@ -744,6 +870,13 @@ func (a *API) Configure(router *mux.Router) error {
 	router.HandleFunc("/api/account/update-password", a.updatePassword).Methods("POST", "OPTIONS").Use(authMw)
 	router.HandleFunc("/api/account/password-reset/request", a.passwordResetRequest).Methods("POST")
 	router.HandleFunc("/api/account/password-reset/confirm", a.passwordResetConfirm).Methods("POST", "OPTIONS")
+
+	// API Key routes
+	apiKeyRouter := router.PathPrefix("/api/account/keys").Subrouter()
+	apiKeyRouter.Use(authMw)
+	apiKeyRouter.HandleFunc("", a.createAPIKey).Methods("POST", "OPTIONS")
+	apiKeyRouter.HandleFunc("", a.getAPIKeys).Methods("GET", "OPTIONS")
+	apiKeyRouter.HandleFunc("/{keyID}", a.deleteAPIKey).Methods("DELETE", "OPTIONS")
 
 	// Other routes
 	router.HandleFunc("/api/upload-limit", a.uploadLimit).Methods("GET", "OPTIONS")
@@ -765,7 +898,7 @@ func (a *API) Configure(router *mux.Router) error {
 
 	rootRouter := core.GetService[core.HTTPService](a.ctx, core.HTTP_SERVICE).Router().Host(a.ctx.Config().Config().Core.Domain).Subrouter()
 
-	rootRouter.Use(pingAuthMw)
+	rootRouter.Use(authMw)
 	rootRouter.Use(corsHandler.Handler)
 
 	rootRouter.HandleFunc("/api/auth/complete", a.rootAuthComplete).Methods("GET", "OPTIONS")

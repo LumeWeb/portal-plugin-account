@@ -1,5 +1,10 @@
 package messages
 
+import (
+	"github.com/google/uuid"
+	"time"
+)
+
 type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -8,7 +13,7 @@ type LoginRequest struct {
 
 type LoginResponse struct {
 	Token string `json:"token"`
-	Otp   bool   `json:"otp"`
+	Otp   bool   `json:"otp;omitempty"`
 }
 
 type RegisterRequest struct {
@@ -68,4 +73,23 @@ type UpdateEmailRequest struct {
 type UpdatePasswordRequest struct {
 	CurrentPassword string `json:"current_password"`
 	NewPassword     string `json:"new_password"`
+}
+
+type APIKeyCreateRequest struct {
+	Name string `json:"name"`
+}
+
+type APIKey struct {
+	UUID      uuid.UUID `json:"uuid"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type ListAPIKeyResponse struct {
+	Data  []APIKey `json:"data"`
+	Total int64    `json:"total"`
+}
+
+type CreateAPIKeyResponse struct {
+	Key string `json:"key"`
 }
