@@ -815,6 +815,31 @@ func (a *API) authWithAPIKey(w http.ResponseWriter, r *http.Request) {
 
 	ctx.Encode(response)
 }
+
+func (a *API) deleteAccount(w http.ResponseWriter, r *http.Request) {
+	ctx := httputil.Context(r, w)
+	user, ok := a.getUser(ctx)
+
+	if !ok {
+		return
+	}
+
+	err := a.user.RequestAccountDeletion(user, ctx.Request.RemoteAddr)
+	if err != nil {
+		if acctErr, ok := err.(*core.AccountError); ok {
+			if acctErr.IsErrorType(core.ErrKeyAccountDeletionRequestAlreadyExists) {
+				_ = ctx.Error(acctErr, http.StatusConflict)
+				return
+			}
+		}
+		_ = ctx.Error(err, http.StatusInternalServerError)
+		return
+	}
+
+	core.ClearAuthCookie(w, a.ctx)
+	w.WriteHeader(http.StatusOK)
+}
+
 func (a *API) Configure(router *mux.Router) error {
 	pluginCfg := a.config.GetAPI(internal.PLUGIN_NAME).(*pluginConfig.APIConfig)
 	// CORS configuration
@@ -870,6 +895,7 @@ func (a *API) Configure(router *mux.Router) error {
 	router.HandleFunc("/api/account/update-password", a.updatePassword).Methods("POST", "OPTIONS").Use(authMw)
 	router.HandleFunc("/api/account/password-reset/request", a.passwordResetRequest).Methods("POST")
 	router.HandleFunc("/api/account/password-reset/confirm", a.passwordResetConfirm).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/account/delete", a.deleteAccount).Methods("DELETE", "OPTIONS").Use(authMw)
 
 	// API Key routes
 	apiKeyRouter := router.PathPrefix("/api/account/keys").Subrouter()
