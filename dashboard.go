@@ -6,7 +6,9 @@ import (
 	"go.lumeweb.com/portal-plugin-dashboard/internal"
 	"go.lumeweb.com/portal-plugin-dashboard/internal/api"
 	pluginConfig "go.lumeweb.com/portal-plugin-dashboard/internal/config"
+	pluginDb "go.lumeweb.com/portal-plugin-dashboard/internal/db"
 	"go.lumeweb.com/portal-plugin-dashboard/internal/provider"
+	pluginService "go.lumeweb.com/portal-plugin-dashboard/internal/service"
 	"go.lumeweb.com/portal/core"
 	"go.lumeweb.com/portal/service"
 )
@@ -30,11 +32,24 @@ func init() {
 			}
 
 			builder.AddPluginMeta(internal.PLUGIN_NAME, "subdomain", pluginCfg.Subdomain)
-
 			return nil
 		},
 		API: func() (core.API, []core.ContextBuilderOption, error) {
 			return api.NewAPI()
+		},
+		Services: func() ([]core.ServiceInfo, error) {
+			return []core.ServiceInfo{
+				{
+					ID: pluginService.API_KEY_SERVICE,
+					Factory: func() (core.Service, []core.ContextBuilderOption, error) {
+						return pluginService.NewAPIKeyService()
+					},
+					Depends: []string{core.USER_SERVICE, core.AUTH_SERVICE},
+				},
+			}, nil
+		},
+		Models: []any{
+			&pluginDb.APIKey{},
 		},
 		MailerTemplates: templates,
 	})
