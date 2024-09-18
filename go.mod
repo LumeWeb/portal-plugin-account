@@ -12,7 +12,7 @@ require (
 	github.com/samber/lo v1.47.0
 	github.com/sethvargo/go-password v0.3.1
 	go.lumeweb.com/httputil v0.0.0-20240616192644-3d270a528d86
-	go.lumeweb.com/portal v0.1.2-0.20240917223643-c928b3d8edd2
+	go.lumeweb.com/portal v0.1.2-0.20240918123552-7633dfa6f912
 	go.lumeweb.com/web/go/portal-dashboard v0.0.0-20240628083440-8b3dfcc3e606
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.27.0
