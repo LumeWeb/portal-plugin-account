@@ -876,8 +876,8 @@ func (a *API) Configure(router *mux.Router) error {
 
 	// Authentication routes
 	router.HandleFunc("/api/auth/register", a.register).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/auth/login", a.login).Methods("POST", "OPTIONS").Use(corsHandler.Handler)
-	router.HandleFunc("/api/auth/logout", a.logout).Methods("POST", "OPTIONS").Use(authMw)
+	router.HandleFunc("/api/auth/login", a.login).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/auth/logout", a.logout).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/auth/ping", a.ping).Methods("POST", "OPTIONS").Use(authMw)
 	router.HandleFunc("/api/auth/key", a.authWithAPIKey).Methods("POST", "OPTIONS")
 
