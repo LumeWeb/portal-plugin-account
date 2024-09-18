@@ -826,11 +826,10 @@ func (a *API) deleteAccount(w http.ResponseWriter, r *http.Request) {
 
 	err := a.user.RequestAccountDeletion(user, ctx.Request.RemoteAddr)
 	if err != nil {
-		if acctErr, ok := err.(*core.AccountError); ok {
-			if acctErr.IsErrorType(core.ErrKeyAccountDeletionRequestAlreadyExists) {
-				_ = ctx.Error(acctErr, http.StatusConflict)
-				return
-			}
+		if core.IsAccountError(err) && core.AsAccountError(err).IsErrorType(core.ErrKeyAccountDeletionRequestAlreadyExists) {
+			_ = ctx.Error(err, core.AsAccountError(err).HttpStatus())
+			return
+
 		}
 		_ = ctx.Error(err, http.StatusInternalServerError)
 		return
