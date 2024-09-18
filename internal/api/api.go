@@ -160,7 +160,7 @@ func (a *API) login(w http.ResponseWriter, r *http.Request) {
 	jwt, user, err := a.auth.LoginPassword(request.Email, request.Password, r.RemoteAddr, request.Remember)
 	if err != nil || user == nil {
 		err := core.NewAccountError(core.ErrKeyInvalidLogin, err)
-		_ = ctx.Error(err, http.StatusUnauthorized)
+		_ = ctx.Error(err, err.HttpStatus())
 		if err != nil {
 			a.logger.Error("failed to login", zap.Error(err))
 		}
