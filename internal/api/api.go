@@ -910,13 +910,23 @@ func (a *API) Configure(router *mux.Router) error {
 		a.setupSocialAuthRoutes(router)
 	}
 
-	// Catch-all route for client-side app
-	router.PathPrefix("/assets/").Handler(portal_dashboard.Handler())
+	var httpHandler http.Handler
+
+	// Serve the app from AppFolder if available
+	if pluginCfg.AppFolder != "" {
+		httpHandler = http.FileServer(http.Dir(pluginCfg.AppFolder))
+	} else {
+		// Serve the dashboard embedded in the plugin
+		httpHandler = portal_dashboard.Handler()
+	}
+
+	router.PathPrefix("/assets/").Handler(httpHandler)
 	router.PathPrefix("/").MatcherFunc(
 		func(r *http.Request, rm *mux.RouteMatch) bool {
 			return !strings.HasPrefix(r.URL.Path, "/api/")
-		}).Handler(portal_dashboard.Handler()).Use(func(next http.Handler) http.Handler {
+		}).Handler(httpHandler).Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			r.URL.Path = "/"
 			next.ServeHTTP(w, r)
 		})
 	})
