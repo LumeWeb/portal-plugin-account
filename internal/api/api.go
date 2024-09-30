@@ -10,7 +10,6 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
-	"github.com/rs/cors"
 	"github.com/samber/lo"
 	"github.com/sethvargo/go-password/password"
 	"go.lumeweb.com/httputil"
@@ -841,16 +840,8 @@ func (a *API) deleteAccount(w http.ResponseWriter, r *http.Request) {
 
 func (a *API) Configure(router *mux.Router) error {
 	pluginCfg := a.config.GetAPI(internal.PLUGIN_NAME).(*pluginConfig.APIConfig)
-	// CORS configuration
-	corsOpts := cors.Options{
-		AllowOriginFunc: func(origin string) bool {
-			return true
-		},
-		AllowedMethods:   []string{"GET", "POST", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Authorization", "Content-Type"},
-		AllowCredentials: true,
-	}
-	corsHandler := cors.New(corsOpts)
+
+	corsHandler := middleware.CorsMiddleware(nil)
 
 	// Middleware functions
 	loginAuthMw2fa := middleware.AuthMiddleware(middleware.AuthMiddlewareOptions{
@@ -871,7 +862,7 @@ func (a *API) Configure(router *mux.Router) error {
 		return err
 	}
 
-	router.Use(corsHandler.Handler)
+	router.Use(corsHandler)
 
 	// Authentication routes
 	router.HandleFunc("/api/auth/register", a.register).Methods("POST", "OPTIONS")
@@ -934,7 +925,7 @@ func (a *API) Configure(router *mux.Router) error {
 	rootRouter := core.GetService[core.HTTPService](a.ctx, core.HTTP_SERVICE).Router().Host(a.ctx.Config().Config().Core.Domain).Subrouter()
 
 	rootRouter.Use(authMw)
-	rootRouter.Use(corsHandler.Handler)
+	rootRouter.Use(corsHandler)
 
 	rootRouter.HandleFunc("/api/auth/complete", a.rootAuthComplete).Methods("GET", "OPTIONS")
 	return nil
