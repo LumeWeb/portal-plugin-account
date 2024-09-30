@@ -5,6 +5,7 @@ go 1.22.1
 toolchain go1.22.2
 
 require (
+	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/sessions v1.1.1
 	github.com/markbates/goth v1.80.0
@@ -12,7 +13,7 @@ require (
 	github.com/samber/lo v1.47.0
 	github.com/sethvargo/go-password v0.3.1
 	go.lumeweb.com/httputil v0.0.0-20240616192644-3d270a528d86
-	go.lumeweb.com/portal v0.1.2-0.20240918123552-7633dfa6f912
+	go.lumeweb.com/portal v0.1.2-0.20240930084359-ce346d2e59b1
 	go.lumeweb.com/web/go/portal-dashboard v0.0.0-20240628083440-8b3dfcc3e606
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.27.0
@@ -29,28 +30,28 @@ require (
 	github.com/aead/chacha20 v0.0.0-20180709150244-8b13a72661da // indirect
 	github.com/alicebob/gopher-json v0.0.0-20230218143504-906a9b012302 // indirect
 	github.com/alicebob/miniredis/v2 v2.30.4 // indirect
-	github.com/aws/aws-sdk-go-v2 v1.30.5 // indirect
-	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.4 // indirect
-	github.com/aws/aws-sdk-go-v2/config v1.27.34 // indirect
-	github.com/aws/aws-sdk-go-v2/credentials v1.17.32 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.13 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.17 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.17 // indirect
+	github.com/aws/aws-sdk-go-v2 v1.31.0 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.5 // indirect
+	github.com/aws/aws-sdk-go-v2/config v1.27.37 // indirect
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.35 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.14 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.18 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.18 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.1 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.17 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.11.4 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.3.19 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.11.19 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.17.17 // indirect
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.61.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.22.7 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.26.7 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sts v1.30.7 // indirect
-	github.com/aws/smithy-go v1.20.4 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.18 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.11.5 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.3.20 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.11.20 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.17.18 // indirect
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.63.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.23.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.27.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.31.1 // indirect
+	github.com/aws/smithy-go v1.21.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.6.1 // indirect
 	github.com/boombuler/barcode v1.0.1 // indirect
-	github.com/casbin/casbin/v2 v2.99.0 // indirect
+	github.com/casbin/casbin/v2 v2.100.0 // indirect
 	github.com/casbin/govaluate v1.2.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/coreos/go-semver v0.3.1 // indirect
@@ -75,7 +76,6 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/gookit/event v1.1.2 // indirect
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/handlers v1.5.2 // indirect
