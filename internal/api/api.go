@@ -883,7 +883,7 @@ func (a *API) Configure(router *mux.Router) error {
 	router.HandleFunc("/api/account/verify-email/resend", a.resendVerifyEmail).Methods("POST", "OPTIONS").Use(authMw)
 	router.HandleFunc("/api/account/update-email", a.updateEmail).Methods("POST", "OPTIONS").Use(authMw)
 	router.HandleFunc("/api/account/update-password", a.updatePassword).Methods("POST", "OPTIONS").Use(authMw)
-	router.HandleFunc("/api/account/password-reset/request", a.passwordResetRequest).Methods("POST")
+	router.HandleFunc("/api/account/password-reset/request", a.passwordResetRequest).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/account/password-reset/confirm", a.passwordResetConfirm).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/account/delete", a.deleteAccount).Methods("DELETE", "OPTIONS").Use(authMw)
 
