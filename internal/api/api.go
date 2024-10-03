@@ -383,7 +383,7 @@ func (a *API) passwordResetRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !exists {
-		_ = ctx.Error(errors.New("invalid request"), http.StatusBadRequest)
+		w.WriteHeader(http.StatusOK)
 		return
 	}
 
