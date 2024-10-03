@@ -416,7 +416,7 @@ func (a *API) passwordResetConfirm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = a.password.ResetPassword(request.Email, request.Password, request.Token)
+	err = a.password.ResetPassword(request.Email, request.Token, request.Password)
 	if err != nil {
 		_ = ctx.Error(err, http.StatusInternalServerError)
 		return
