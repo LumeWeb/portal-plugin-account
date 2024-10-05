@@ -60,6 +60,10 @@ paths:
             responses:
                 '200':
                     description: Email verification resent successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ResendVerifyEmailRequest'
     /api/auth/otp/generate:
         get:
             summary: Generate OTP for two-factor authentication
@@ -242,6 +246,13 @@ components:
                 email:
                     type: string
                 token:
+                    type: string
+        ResendVerifyEmailRequest:
+            type: object
+            required:
+                - email
+            properties:
+                email:
                     type: string
         OTPGenerateResponse:
             type: object
