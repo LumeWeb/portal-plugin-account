@@ -240,14 +240,32 @@ func (a *API) verifyEmail(w http.ResponseWriter, r *http.Request) {
 
 func (a *API) resendVerifyEmail(w http.ResponseWriter, r *http.Request) {
 	ctx := httputil.Context(r, w)
-	user, ok := a.getUser(ctx)
 
-	if !ok {
+	var request messages.ResendVerifyEmailRequest
+	err := ctx.Decode(&request)
+	if err != nil {
 		return
 	}
 
-	err := a.user.SendEmailVerification(user)
+	exists, _user, err := a.user.EmailExists(request.Email)
+
 	if err != nil {
+		_ = ctx.Error(err, http.StatusInternalServerError)
+		return
+	}
+
+	if !exists {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	err = a.user.SendEmailVerification(_user.ID)
+	if err != nil {
+		if core.IsAccountError(err) && core.AsAccountError(err).IsErrorType(core.ErrKeyAccountAlreadyVerified) {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
 		_ = ctx.Error(err, http.StatusInternalServerError)
 		return
 	}
@@ -879,8 +897,8 @@ func (a *API) Configure(router *mux.Router) error {
 
 	// Account routes
 	router.HandleFunc("/api/account", a.accountInfo).Methods("GET", "OPTIONS").Use(authMw)
-	router.HandleFunc("/api/account/verify-email", a.verifyEmail).Methods("POST", "OPTIONS").Use(authMw)
-	router.HandleFunc("/api/account/verify-email/resend", a.resendVerifyEmail).Methods("POST", "OPTIONS").Use(authMw)
+	router.HandleFunc("/api/account/verify-email", a.verifyEmail).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/account/verify-email/resend", a.resendVerifyEmail).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/account/update-email", a.updateEmail).Methods("POST", "OPTIONS").Use(authMw)
 	router.HandleFunc("/api/account/update-password", a.updatePassword).Methods("POST", "OPTIONS").Use(authMw)
 	router.HandleFunc("/api/account/password-reset/request", a.passwordResetRequest).Methods("POST", "OPTIONS")
