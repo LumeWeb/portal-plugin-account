@@ -5,9 +5,9 @@ import "go.lumeweb.com/portal/config"
 var _ config.APIConfig = (*APIConfig)(nil)
 
 type APIConfig struct {
-	Subdomain   string      `mapstructure:"subdomain"`
-	SocialLogin SocialLogin `mapstructure:"social_login"`
-	AppFolder   string      `mapstructure:"app_folder"`
+	Subdomain   string      `config:"subdomain"`
+	SocialLogin SocialLogin `config:"social_login"`
+	AppFolder   string      `config:"app_folder"`
 }
 
 func (A APIConfig) Defaults() map[string]any {
