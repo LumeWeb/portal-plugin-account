@@ -29,32 +29,32 @@ func (c Color) Validate() error {
 }
 
 type SystemColors struct {
-	Background           Color `config:"background" json:"system-color-1"`
-	SubtleBackground     Color `config:"subtlebackground" json:"system-color-2"`
-	UIElementBackground  Color `config:"ui_element_background" json:"system-color-3"`
-	HoveredUIElement     Color `config:"hovered_ui_element" json:"system-color-4"`
-	ActiveUIElement      Color `config:"active_ui_element" json:"system-color-5"`
-	Borders              Color `config:"borders" json:"system-color-6"`
-	UIElementBorder      Color `config:"ui_element_border" json:"system-color-7"`
-	HoveredElementBorder Color `config:"hovered_element_border" json:"system-color-8"`
-	SolidBackground      Color `config:"solid_background" json:"system-color-9"`
-	HoveredSolidBg       Color `config:"hovered_solid_bg" json:"system-color-10"`
-	LowContrastText      Color `config:"low_contrast_text" json:"system-color-11"`
-	HighContrastText     Color `config:"high_contrast_text" json:"system-color-12"`
+	Background           Color `config:"background" json:"system-color-1" yaml:"background"`
+	SubtleBackground     Color `config:"subtle_background" json:"system-color-2" yaml:"subtle_background"`
+	UIElementBackground  Color `config:"ui_element_background" json:"system-color-3" yaml:"ui_element_background"`
+	HoveredUIElement     Color `config:"hovered_ui_element" json:"system-color-4" yaml:"hovered_ui_element"`
+	ActiveUIElement      Color `config:"active_ui_element" json:"system-color-5" yaml:"active_ui_element"`
+	Borders              Color `config:"borders" json:"system-color-6" yaml:"borders"`
+	UIElementBorder      Color `config:"ui_element_border" json:"system-color-7" yaml:"ui_element_border"`
+	HoveredElementBorder Color `config:"hovered_element_border" json:"system-color-8" yaml:"hovered_element_border"`
+	SolidBackground      Color `config:"solid_background" json:"system-color-9" yaml:"solid_background"`
+	HoveredSolidBg       Color `config:"hovered_solid_bg" json:"system-color-10" yaml:"hovered_solid_bg"`
+	LowContrastText      Color `config:"low_contrast_text" json:"system-color-11" yaml:"low_contrast_text"`
+	HighContrastText     Color `config:"high_contrast_text" json:"system-color-12" yaml:"high_contrast_text"`
 }
 
 type BackgroundImages struct {
-	Register      string `config:"register" json:"register"`
-	ResetPassword string `config:"reset_password" json:"reset_password"`
-	Login         string `config:"login" json:"login"`
+	Register      string `config:"register" json:"register" yaml:"register"`
+	ResetPassword string `config:"reset_password" json:"reset_password" yaml:"reset_password"`
+	Login         string `config:"login" json:"login" yaml:"login"`
 }
 
 type Theme struct {
-	Name             string           `config:"name" json:"name"`
-	ID               string           `config:"id" json:"id"`
-	SystemColors     SystemColors     `config:"system_colors" json:"system_colors"`
-	BackgroundImages BackgroundImages `config:"background_images" json:"background_images"`
-	Default          bool             `config:"default" json:"default"`
+	Name             string           `config:"name" json:"name" yaml:"name"`
+	ID               string           `config:"id" json:"id" yaml:"id"`
+	SystemColors     SystemColors     `config:"system_colors" json:"system_colors" yaml:"system_colors"`
+	BackgroundImages BackgroundImages `config:"background_images" json:"background_images" yaml:"background_images"`
+	Default          bool             `config:"default" json:"default" yaml:"default"`
 }
 
 func (t Theme) Validate() error {
