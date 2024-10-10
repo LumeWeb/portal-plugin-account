@@ -32,6 +32,7 @@ func init() {
 			}
 
 			builder.AddPluginMeta(internal.PLUGIN_NAME, "subdomain", pluginCfg.Subdomain)
+			builder.AddPluginMeta(internal.PLUGIN_NAME, "themes", pluginCfg.Themes)
 			return nil
 		},
 		API: func() (core.API, []core.ContextBuilderOption, error) {
