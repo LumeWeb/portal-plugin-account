@@ -856,96 +856,101 @@ func (a *API) deleteAccount(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (a *API) Configure(router *mux.Router) error {
+func (a *API) Configure(router *mux.Router, accessSvc core.AccessService) error {
 	pluginCfg := a.config.GetAPI(internal.PLUGIN_NAME).(*pluginConfig.APIConfig)
 
+	// Middleware setup
 	corsHandler := middleware.CorsMiddleware(nil)
-
-	// Middleware functions
 	loginAuthMw2fa := middleware.AuthMiddleware(middleware.AuthMiddlewareOptions{
-		Context:        a.ctx,
-		Purpose:        core.JWTPurpose2FA,
-		EmptyAllowed:   false,
-		ExpiredAllowed: false,
+		Context: a.ctx, Purpose: core.JWTPurpose2FA,
+		EmptyAllowed: false, ExpiredAllowed: false,
 	})
-
 	authMw := middleware.AuthMiddleware(middleware.AuthMiddlewareOptions{
-		Context: a.ctx,
-		Purpose: core.JWTPurposeLogin,
+		Context: a.ctx, Purpose: core.JWTPurposeLogin,
 	})
+	accessMw := middleware.AccessMiddleware(a.ctx)
 
 	// Swagger routes
-	err := swagger.Swagger(swagSpec, router)
-	if err != nil {
+	if err := swagger.Swagger(swagSpec, router); err != nil {
 		return err
 	}
 
 	router.Use(corsHandler)
 
-	// Authentication routes
-	router.HandleFunc("/api/auth/register", a.register).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/auth/login", a.login).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/auth/logout", a.logout).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/auth/ping", a.ping).Methods("POST", "OPTIONS").Use(authMw)
-	router.HandleFunc("/api/auth/key", a.authWithAPIKey).Methods("POST", "OPTIONS")
+	// Define routes
+	routes := []struct {
+		Path    string
+		Method  string
+		Handler http.HandlerFunc
+		Access  string
+		Use2FA  bool
+	}{
+		{"/api/auth/register", "POST", a.register, "", false},
+		{"/api/auth/login", "POST", a.login, "", false},
+		{"/api/auth/logout", "POST", a.logout, "", false},
+		{"/api/auth/ping", "POST", a.ping, core.ACCESS_USER_ROLE, false},
+		{"/api/auth/key", "POST", a.authWithAPIKey, "", false},
+		{"/api/auth/otp/generate", "POST", a.otpGenerate, core.ACCESS_USER_ROLE, false},
+		{"/api/auth/otp/validate", "POST", a.otpValidate, "", true},
+		{"/api/auth/otp/verify", "POST", a.otpVerify, core.ACCESS_USER_ROLE, false},
+		{"/api/auth/otp/disable", "POST", a.otpDisable, core.ACCESS_USER_ROLE, false},
+		{"/api/account", "GET", a.accountInfo, core.ACCESS_USER_ROLE, false},
+		{"/api/account/verify-email", "POST", a.verifyEmail, "", false},
+		{"/api/account/verify-email/resend", "POST", a.resendVerifyEmail, "", false},
+		{"/api/account/update-email", "POST", a.updateEmail, core.ACCESS_USER_ROLE, false},
+		{"/api/account/update-password", "POST", a.updatePassword, core.ACCESS_USER_ROLE, false},
+		{"/api/account/password-reset/request", "POST", a.passwordResetRequest, "", false},
+		{"/api/account/password-reset/confirm", "POST", a.passwordResetConfirm, "", false},
+		{"/api/account/delete", "DELETE", a.deleteAccount, core.ACCESS_USER_ROLE, false},
+		{"/api/account/keys", "POST", a.createAPIKey, core.ACCESS_USER_ROLE, false},
+		{"/api/account/keys", "GET", a.getAPIKeys, core.ACCESS_USER_ROLE, false},
+		{"/api/account/keys/{keyID}", "DELETE", a.deleteAPIKey, core.ACCESS_USER_ROLE, false},
+		{"/api/upload-limit", "GET", a.uploadLimit, core.ACCESS_USER_ROLE, false},
+	}
 
-	// OTP routes
-	router.HandleFunc("/api/auth/otp/generate", a.otpGenerate).Methods("POST", "OPTIONS").Use(authMw)
-	router.HandleFunc("/api/auth/otp/validate", a.otpValidate).Methods("POST", "OPTIONS").Use(loginAuthMw2fa)
-	router.HandleFunc("/api/auth/otp/verify", a.otpVerify).Methods("POST", "OPTIONS").Use(authMw)
-	router.HandleFunc("/api/auth/otp/disable", a.otpDisable).Methods("POST", "OPTIONS").Use(authMw)
+	// Register routes
+	for _, route := range routes {
+		r := router.HandleFunc(route.Path, route.Handler).Methods(route.Method, "OPTIONS")
+		if route.Use2FA {
+			r.Use(loginAuthMw2fa)
+		} else {
+			r.Use(authMw)
+		}
 
-	// Account routes
-	router.HandleFunc("/api/account", a.accountInfo).Methods("GET", "OPTIONS").Use(authMw)
-	router.HandleFunc("/api/account/verify-email", a.verifyEmail).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/account/verify-email/resend", a.resendVerifyEmail).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/account/update-email", a.updateEmail).Methods("POST", "OPTIONS").Use(authMw)
-	router.HandleFunc("/api/account/update-password", a.updatePassword).Methods("POST", "OPTIONS").Use(authMw)
-	router.HandleFunc("/api/account/password-reset/request", a.passwordResetRequest).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/account/password-reset/confirm", a.passwordResetConfirm).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/account/delete", a.deleteAccount).Methods("DELETE", "OPTIONS").Use(authMw)
+		if route.Access != "" {
+			r.Use(accessMw)
+		}
 
-	// API Key routes
-	apiKeyRouter := router.PathPrefix("/api/account/keys").Subrouter()
-	apiKeyRouter.Use(authMw)
-	apiKeyRouter.HandleFunc("", a.createAPIKey).Methods("POST", "OPTIONS")
-	apiKeyRouter.HandleFunc("", a.getAPIKeys).Methods("GET", "OPTIONS")
-	apiKeyRouter.HandleFunc("/{keyID}", a.deleteAPIKey).Methods("DELETE", "OPTIONS")
-
-	// Other routes
-	router.HandleFunc("/api/upload-limit", a.uploadLimit).Methods("GET", "OPTIONS")
+		if err := accessSvc.RegisterRoute(a.Subdomain(), route.Path, route.Method, route.Access); err != nil {
+			return err
+		}
+	}
 
 	if pluginCfg.SocialLogin.Enabled {
 		a.setupSocialAuthRoutes(router)
 	}
 
+	// Static file serving
 	var httpHandler http.Handler
-
-	// Serve the app from AppFolder if available
 	if pluginCfg.AppFolder != "" {
 		httpHandler = http.FileServer(http.Dir(pluginCfg.AppFolder))
 	} else {
-		// Serve the dashboard embedded in the plugin
 		httpHandler = portal_dashboard.Handler()
 	}
 
 	router.PathPrefix("/assets/").Handler(httpHandler)
-	router.PathPrefix("/").MatcherFunc(
-		func(r *http.Request, rm *mux.RouteMatch) bool {
-			return !strings.HasPrefix(r.URL.Path, "/api/")
-		}).Handler(httpHandler).Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			r.URL.Path = "/"
-			next.ServeHTTP(w, r)
-		})
-	})
+	router.PathPrefix("/").MatcherFunc(func(r *http.Request, rm *mux.RouteMatch) bool {
+		return !strings.HasPrefix(r.URL.Path, "/api/")
+	}).Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.URL.Path = "/"
+		httpHandler.ServeHTTP(w, r)
+	}))
 
+	// Root router setup
 	rootRouter := core.GetService[core.HTTPService](a.ctx, core.HTTP_SERVICE).Router().Host(a.ctx.Config().Config().Core.Domain).Subrouter()
-
-	rootRouter.Use(authMw)
-	rootRouter.Use(corsHandler)
-
+	rootRouter.Use(authMw, corsHandler)
 	rootRouter.HandleFunc("/api/auth/complete", a.rootAuthComplete).Methods("GET", "OPTIONS")
+
 	return nil
 }
 
