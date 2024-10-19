@@ -2,6 +2,7 @@ package messages
 
 import (
 	"github.com/google/uuid"
+	"go.lumeweb.com/portal/core"
 	"time"
 )
 
@@ -95,4 +96,8 @@ type ListAPIKeyResponse struct {
 
 type CreateAPIKeyResponse struct {
 	Key string `json:"key"`
+}
+type AccountPermissionsResponse struct {
+	Permissions []*core.AccessPolicy `json:"permissions"`
+	Model       *core.AccessModel    `json:"model"`
 }

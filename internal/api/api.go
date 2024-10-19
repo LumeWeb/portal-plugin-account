@@ -49,6 +49,7 @@ type API struct {
 	password core.PasswordResetService
 	otp      core.OTPService
 	apiKey   service.APIKeyService
+	access   core.AccessService
 	logger   *core.Logger
 }
 
@@ -72,6 +73,7 @@ func NewAPI() (*API, []core.ContextBuilderOption, error) {
 			api.password = ctx.Service(core.PASSWORD_RESET_SERVICE).(core.PasswordResetService)
 			api.otp = ctx.Service(core.OTP_SERVICE).(core.OTPService)
 			api.apiKey = ctx.Service(service.API_KEY_SERVICE).(service.APIKeyService)
+			api.access = ctx.Service(core.ACCESS_SERVICE).(core.AccessService)
 			api.logger = ctx.APILogger(api)
 
 			return nil
@@ -529,6 +531,28 @@ func (a *API) accountInfo(w http.ResponseWriter, r *http.Request) {
 	ctx.Encode(response)
 }
 
+func (a *API) accountPermissions(w http.ResponseWriter, r *http.Request) {
+	ctx := httputil.Context(r, w)
+	user, ok := a.getUser(ctx)
+
+	if !ok {
+		return
+	}
+
+	perms, err := a.access.ExportUserPolicy(user)
+	if err != nil {
+		_ = ctx.Error(err, http.StatusInternalServerError)
+		return
+	}
+
+	model := a.access.ExportModel()
+
+	ctx.Encode(&messages.AccountPermissionsResponse{
+		Permissions: perms,
+		Model:       model,
+	})
+}
+
 func (a *API) logout(w http.ResponseWriter, r *http.Request) {
 	core.ClearAuthCookie(w, a.ctx)
 	w.WriteHeader(http.StatusOK)
@@ -895,6 +919,7 @@ func (a *API) Configure(router *mux.Router, accessSvc core.AccessService) error 
 		{"/api/auth/otp/verify", "POST", a.otpVerify, core.ACCESS_USER_ROLE, false},
 		{"/api/auth/otp/disable", "POST", a.otpDisable, core.ACCESS_USER_ROLE, false},
 		{"/api/account", "GET", a.accountInfo, core.ACCESS_USER_ROLE, false},
+		{"/api/account/permissions", "GET", a.accountPermissions, core.ACCESS_USER_ROLE, false},
 		{"/api/account/verify-email", "POST", a.verifyEmail, "", false},
 		{"/api/account/verify-email/resend", "POST", a.resendVerifyEmail, "", false},
 		{"/api/account/update-email", "POST", a.updateEmail, core.ACCESS_USER_ROLE, false},
