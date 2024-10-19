@@ -914,7 +914,9 @@ func (a *API) Configure(router *mux.Router, accessSvc core.AccessService) error 
 		if route.Use2FA {
 			r.Use(loginAuthMw2fa)
 		} else {
-			r.Use(authMw)
+			if route.Access != "" {
+				r.Use(authMw)
+			}
 		}
 
 		if route.Access != "" {
