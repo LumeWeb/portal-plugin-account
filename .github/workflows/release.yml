@@ -28,6 +28,6 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: LumeWeb/golang-versioner-action@v0.1.4
+      - uses: LumeWeb/golang-versioner-action@v0.1.5
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
