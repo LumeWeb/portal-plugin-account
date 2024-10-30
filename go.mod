@@ -13,7 +13,7 @@ require (
 	github.com/sethvargo/go-password v0.3.1
 	go.lumeweb.com/httputil v0.0.0-20240907105629-dbffb601f2ab
 	go.lumeweb.com/portal v0.2.0
-	go.lumeweb.com/web/go/portal-dashboard v0.0.0-20240628083440-8b3dfcc3e606
+	go.lumeweb.com/web/go/portal-dashboard v0.2.0-portal-dashboard-go
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.28.0
 	gorm.io/datatypes v1.2.4
