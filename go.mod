@@ -16,7 +16,7 @@ require (
 	go.lumeweb.com/web/go/portal-dashboard v0.0.0-20240628083440-8b3dfcc3e606
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.28.0
-	gorm.io/datatypes v1.2.2
+	gorm.io/datatypes v1.2.4
 	gorm.io/gorm v1.25.12
 )
 
