@@ -7,7 +7,7 @@ toolchain go1.23.2
 require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
-	github.com/gorilla/sessions v1.2.1
+	github.com/gorilla/sessions v1.4.0
 	github.com/markbates/goth v1.80.0
 	github.com/samber/lo v1.47.0
 	github.com/sethvargo/go-password v0.3.1
@@ -84,7 +84,7 @@ require (
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/gookit/event v1.1.2 // indirect
 	github.com/gorilla/handlers v1.5.2 // indirect
-	github.com/gorilla/securecookie v1.1.1 // indirect
+	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/gotd/contrib v0.20.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
