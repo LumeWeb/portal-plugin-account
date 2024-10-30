@@ -3,9 +3,11 @@ name: Release
 on:
   push:
     branches:
-      - develop
+      - "**"
     paths:
       - '.changeset/**'
+      - '.changeset-release/**'
+      - 'package.json'
     tags:
       - '**'
   pull_request:
@@ -15,13 +17,17 @@ on:
       - '**'
     paths:
       - '.changeset/**'
+      - '.changeset-release/**'
+      - 'package.json'
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: LumeWeb/golang-versioner-action@v0.1.3
+      - uses: LumeWeb/golang-versioner-action@v0.1.4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
