@@ -1,5 +1,11 @@
 # @lumeweb/portal-plugin-dashboard
 
+## 0.2.1
+
+### Patch Changes
+
+- d8a18cb: Need to cheat on the go.lumeweb.com/web/go/portal-dashboard version due to go vanity funkiness
+
 ## 0.2.0
 
 ### Minor Changes
