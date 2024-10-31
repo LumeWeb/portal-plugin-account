@@ -13,7 +13,7 @@ require (
 	github.com/sethvargo/go-password v0.3.1
 	go.lumeweb.com/httputil v0.0.0-20240907105629-dbffb601f2ab
 	go.lumeweb.com/portal v0.2.0
-	go.lumeweb.com/web/go/portal-dashboard v0.2.1-portal-dashboard-go-test
+	go.lumeweb.com/web/go/portal-dashboard v0.2.0-portal-dashboard-go.0.20241031065849-6a925a3af8e5
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.28.0
 	gorm.io/datatypes v1.2.4
@@ -192,3 +192,5 @@ replace (
 	github.com/tus/tusd/v2 v2.4.0 => github.com/LumeWeb/tusd/v2 v2.2.3-0.20241008001850-1f6974596ff3
 	golang.org/x/oauth2 => github.com/LumeWeb/golang-oauth2 v0.0.0-20240915102802-d852d9ef1cde
 )
+
+replace go.lumeweb.com/web/go/portal-dashboard => github.com/LumeWeb/web/go/portal-dashboard v0.0.0-20241031065849-6a925a3af8e5
