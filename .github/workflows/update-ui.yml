@@ -42,7 +42,7 @@ jobs:
             Source: ${{ github.event.client_payload.repository }}@${{ github.event.client_payload.commit_hash }}
             Version: ${{ github.event.client_payload.version }}
           branch: deps/update-ui
-          base: main
+          base: develop
           delete-branch: true
           labels: |
             dependencies
