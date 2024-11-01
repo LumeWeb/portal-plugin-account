@@ -1,5 +1,11 @@
 # @lumeweb/portal-plugin-dashboard
 
+## 0.2.3
+
+### Patch Changes
+
+- 592aa4b: update webapp
+
 ## 0.2.2
 
 ### Patch Changes
