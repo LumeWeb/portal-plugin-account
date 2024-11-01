@@ -39,9 +39,11 @@ jobs:
           title=""
           for i in {1..3}; do
             index=$((RANDOM % size))
-            title="$title ${words[$index]}"
+            title="$title-${words[$index]}"
           done
-          echo "title=${title## }" >> $GITHUB_OUTPUT
+          # Remove leading dash and output
+          title=${title#-}
+          echo "title=${title}" >> $GITHUB_OUTPUT
 
       - name: Get Package Version
         id: package-version
@@ -50,15 +52,13 @@ jobs:
           echo "name=${PACKAGE_NAME}" >> $GITHUB_OUTPUT
 
       - name: Create Changelog Entry
+        shell: bash
         run: |
           mkdir -p .changeset
-          cat << EOF > .changeset/${{ steps.random-title.outputs.title }}.md
-          ---
-          "${{ steps.package-version.outputs.name }}": ${{ inputs.type }}
-          ---
-
-          ${{ inputs.description }}
-          EOF
+          printf -- "---\n\"%s\": %s\n---\n\n%s\n" \
+            "${{ steps.package-version.outputs.name }}" \
+            "${{ inputs.type }}" \
+            "${{ inputs.description }}" > ".changeset/${{ steps.random-title.outputs.title }}.md"
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
