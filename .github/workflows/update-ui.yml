@@ -27,7 +27,7 @@ jobs:
           NEW_VERSION="v${VERSION}-${APP_NAME}-go.0.${TIMESTAMP}-${COMMIT_HASH}"
           
           # Update the dependency
-          GOPROXY=off go get "go.lumeweb.com/web/go/${APP_NAME}@${COMMIT_HASH}"
+          GOPROXY=direct go get "go.lumeweb.com/web/go/${APP_NAME}@${COMMIT_HASH}"
           go mod tidy
 
       - name: Create Pull Request
