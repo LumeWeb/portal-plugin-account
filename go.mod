@@ -6,7 +6,7 @@ toolchain go1.23.2
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/gorilla/mux v1.8.1
+	github.com/gorilla/mux v1.8.2-0.20240619235004-db9d1d0073d2
 	github.com/gorilla/sessions v1.4.0
 	github.com/markbates/goth v1.80.0
 	github.com/samber/lo v1.47.0
@@ -187,8 +187,6 @@ require (
 )
 
 replace (
-	github.com/gorilla/mux v1.8.1 => github.com/cornejong/gormux v0.0.0-20240526072501-ce1c97b033ec
 	github.com/markbates/goth => github.com/LumeWeb/goth v0.0.0-20240915160947-6a3ee6547104
 	github.com/tus/tusd/v2 v2.4.0 => github.com/LumeWeb/tusd/v2 v2.2.3-0.20241008001850-1f6974596ff3
-	golang.org/x/oauth2 => github.com/LumeWeb/golang-oauth2 v0.0.0-20240915102802-d852d9ef1cde
 )
