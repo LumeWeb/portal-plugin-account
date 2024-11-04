@@ -744,8 +744,8 @@ go.etcd.io/etcd/client/v3 v3.5.16 h1:sSmVYOAHeC9doqi0gv7v86oY/BTld0SEFGaxsU9eRhE
 go.etcd.io/etcd/client/v3 v3.5.16/go.mod h1:X+rExSGkyqxvu276cr2OwPLBaeqFu1cIl4vmRjAD/50=
 go.lumeweb.com/httputil v0.0.0-20240907105629-dbffb601f2ab h1:8FHJm1D00GJNV+5PkaJv+Wyvh5FR+s97rTubAdvi9mA=
 go.lumeweb.com/httputil v0.0.0-20240907105629-dbffb601f2ab/go.mod h1:3aHem0Fj7dH1Kj+WgluoF0WlSyXyUCrJk4bvmdq/Fgs=
-go.lumeweb.com/portal v0.2.0 h1:PRrG7Cm9p1zNcnd2+EJeoioaIvt0ijRsh1X0sQkQGQw=
-go.lumeweb.com/portal v0.2.0/go.mod h1:w5MhBm4UdZV/w8JBQU1pEma9CIBqX/gPmGKL3LlElYk=
+go.lumeweb.com/portal v0.2.1 h1:iTSNVUNu89/nCRF3F0iwcDXcYDFzN9yZoM8HmgLPupI=
+go.lumeweb.com/portal v0.2.1/go.mod h1:w5MhBm4UdZV/w8JBQU1pEma9CIBqX/gPmGKL3LlElYk=
 go.lumeweb.com/web/go/portal-dashboard v0.0.0-20241101172040-fe0c28b983c2 h1:Rtf4/XBWFG88tgjYx0joYdT4gsdkULQy1+YHu3Nbxxg=
 go.lumeweb.com/web/go/portal-dashboard v0.0.0-20241101172040-fe0c28b983c2/go.mod h1:vMRQ9Q+5VbGjXNAOgIhpFwWAo5yoZjgUbVJXXJ1y3qI=
 go.sia.tech/core v0.4.7 h1:UAyErZ3nk5/7N0gIG0OEEJJrxh7ru8lgGLlaNtT/Jq0=
