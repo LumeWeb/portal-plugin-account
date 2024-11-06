@@ -3,6 +3,7 @@ package dashboard
 import (
 	"embed"
 	_ "embed"
+	"go.lumeweb.com/portal-plugin-dashboard/build"
 	"go.lumeweb.com/portal-plugin-dashboard/internal"
 	"go.lumeweb.com/portal-plugin-dashboard/internal/api"
 	pluginConfig "go.lumeweb.com/portal-plugin-dashboard/internal/config"
@@ -23,7 +24,8 @@ func init() {
 	}
 
 	core.RegisterPlugin(core.PluginInfo{
-		ID: internal.PLUGIN_NAME,
+		ID:      internal.PLUGIN_NAME,
+		Version: build.GetInfo(),
 		Meta: func(ctx core.Context, builder core.PortalMetaBuilder) error {
 			pluginCfg := ctx.Config().GetPlugin(internal.PLUGIN_NAME).API.(*pluginConfig.APIConfig)
 			if pluginCfg.SocialLogin.Enabled {
