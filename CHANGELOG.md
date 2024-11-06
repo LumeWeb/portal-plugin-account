@@ -1,5 +1,11 @@
 # @lumeweb/portal-plugin-dashboard
 
+## 0.2.4
+
+### Patch Changes
+
+- 3f9310e: add build information support
+
 ## 0.2.3
 
 ### Patch Changes
