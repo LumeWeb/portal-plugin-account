@@ -67,9 +67,8 @@ func (t Theme) Validate() error {
 func defaultThemeConfig() []Theme {
 	return []Theme{
 		{
-			Name:    "Blue",
-			ID:      "blue",
-			Default: true,
+			Name: "Blue",
+			ID:   "blue",
 			SystemColors: SystemColors{
 				Background:           Color{247, 0, 0},
 				SubtleBackground:     Color{249, 0, 2},
@@ -91,8 +90,9 @@ func defaultThemeConfig() []Theme {
 			},
 		},
 		{
-			Name: "Eclipse",
-			ID:   "eclipse",
+			Name:    "Eclipse",
+			ID:      "eclipse",
+			Default: true,
 			SystemColors: SystemColors{
 				Background:           Color{173, 24, 7},
 				SubtleBackground:     Color{175, 24, 9},
