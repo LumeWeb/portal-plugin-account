@@ -744,8 +744,8 @@ go.lumeweb.com/httputil v0.0.0-20240907105629-dbffb601f2ab h1:8FHJm1D00GJNV+5Pka
 go.lumeweb.com/httputil v0.0.0-20240907105629-dbffb601f2ab/go.mod h1:3aHem0Fj7dH1Kj+WgluoF0WlSyXyUCrJk4bvmdq/Fgs=
 go.lumeweb.com/portal v0.3.2 h1:TwffYZ3Kx8jUgqK1nCJEkWYk/crFYynbjH+MJHp6JcU=
 go.lumeweb.com/portal v0.3.2/go.mod h1:bz8mHY6uIC8lur3K7IiwYlPEh52SrG0lzr+JlODFK4Q=
-go.lumeweb.com/web/go/portal-dashboard v0.0.0-20241101172040-fe0c28b983c2 h1:Rtf4/XBWFG88tgjYx0joYdT4gsdkULQy1+YHu3Nbxxg=
-go.lumeweb.com/web/go/portal-dashboard v0.0.0-20241101172040-fe0c28b983c2/go.mod h1:vMRQ9Q+5VbGjXNAOgIhpFwWAo5yoZjgUbVJXXJ1y3qI=
+go.lumeweb.com/web/go/portal-dashboard v0.0.0-20241231150010-ecaedf54defd h1:6t1eBxLUlo/D7UEroh2rrEOM3vosKi7KVjDrYy7vurA=
+go.lumeweb.com/web/go/portal-dashboard v0.0.0-20241231150010-ecaedf54defd/go.mod h1:vMRQ9Q+5VbGjXNAOgIhpFwWAo5yoZjgUbVJXXJ1y3qI=
 go.sia.tech/core v0.4.7 h1:UAyErZ3nk5/7N0gIG0OEEJJrxh7ru8lgGLlaNtT/Jq0=
 go.sia.tech/core v0.4.7/go.mod h1:j2Ke8ihV8or7d2VDrFZWcCkwSVHO0DNMQJAGs9Qop2M=
 go.sia.tech/coreutils v0.3.3-0.20240927170025-f45eedc64d6f h1:2dWC/pKbdvdK1Xy4lvyHpRnYLuPtIp6Meg+AFSToSA0=
