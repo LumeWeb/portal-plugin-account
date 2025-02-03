@@ -9,7 +9,7 @@ require (
 	github.com/gorilla/mux v1.8.2-0.20240619235004-db9d1d0073d2
 	github.com/gorilla/sessions v1.4.0
 	github.com/markbates/goth v1.80.0
-	github.com/samber/lo v1.47.0
+	github.com/samber/lo v1.49.1
 	github.com/sethvargo/go-password v0.3.1
 	go.lumeweb.com/httputil v0.0.0-20240907105629-dbffb601f2ab
 	go.lumeweb.com/portal v0.4.1
@@ -129,7 +129,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/rs/cors v1.11.1 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
-	github.com/stretchr/testify v1.9.0 // indirect
+	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/tus/tusd/v2 v2.4.0 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	github.com/urfave/cli/v3 v3.0.0-beta1 // indirect
